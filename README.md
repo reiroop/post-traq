@@ -1,8 +1,12 @@
-# post-traq README
+# Post traQ README
 
-This is the README for your extension "post-traq". After writing up a brief description, we recommend including the following sections.
+traQにメッセージを送信します。
 
 ## Features
+
+### Send Message To traQ
+
+traQにメッセージを送信します。
 
 Describe specific features of your extension including screenshots of your extension in action. Image paths are relative to this README file.
 
