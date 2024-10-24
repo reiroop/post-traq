@@ -17,7 +17,18 @@
         "command": "post-traq.postMessageToTraq",
         "title": "Post Message To traQ"
       }
-    ]
+    ],
+    "configuration": {
+      "type": "object",
+      "title": "post-traq Configuration",
+      "properties": {
+        "postTraq.postChannelId": {
+          "type": "string",
+          "default": "SET_YOUR_CHANNEL_ID",
+          "description": "The traQ channel ID to post messages."
+        }
+      }
+    }
   },
   "scripts": {
     "vscode:prepublish": "npm run package",
