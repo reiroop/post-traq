@@ -82,7 +82,9 @@ export function activate(context: vscode.ExtensionContext) {
         }
       } catch (error) {
         // エラー処理
-        vscode.window.showErrorMessage("チャンネル情報の取得に失敗しました");
+        vscode.window.showErrorMessage(
+          "チャンネル情報の取得に失敗しました: " + error
+        );
         console.error("Error:", error);
         return;
       }
@@ -101,7 +103,7 @@ export function activate(context: vscode.ExtensionContext) {
       // POSTリクエストを送信
       try {
         const response = await axios.post(
-          channelApiUrlToPost,
+          channelApiUrlToPost + "/messages",
           {
             content: message,
           },
@@ -113,7 +115,7 @@ export function activate(context: vscode.ExtensionContext) {
       } catch (error) {
         // エラー処理
         vscode.window.showErrorMessage(
-          "traQへのメッセージの投稿に失敗しました"
+          "traQへのメッセージの投稿に失敗しました: " + error
         );
         console.error("Error:", error);
       }
