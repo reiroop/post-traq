@@ -1,6 +1,7 @@
 import axios from "axios";
 import * as vscode from "vscode";
 
+const CHANNEL_ID_GPS_TIMES_REI = "db2935ad-7871-4640-b3e0-1b19dd3d08f3";
 const CHANNEL_ID_GPS_TIMES_REI_BOT = "c5e1f23f-779e-4b78-9bab-406862f294f2";
 
 // アクセストークンをSecretStorageから取得または保存する関数
@@ -42,7 +43,7 @@ export function activate(context: vscode.ExtensionContext) {
       }
 
       // チャネルIDとメッセージを指定
-      const apiUrl = `https://q.trap.jp/api/v3/channels/${CHANNEL_ID_GPS_TIMES_REI_BOT}/messages`;
+      const apiUrl = `https://q.trap.jp/api/v3/channels/${CHANNEL_ID_GPS_TIMES_REI}/messages`;
 
       const message = await vscode.window.showInputBox({
         prompt: "Enter the message to send to traQ",
