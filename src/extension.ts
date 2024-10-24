@@ -1,26 +1,91 @@
-// The module 'vscode' contains the VS Code extensibility API
-// Import the module and reference it with the alias vscode in your code below
-import * as vscode from 'vscode';
+import axios from "axios";
+import * as vscode from "vscode";
 
-// This method is called when your extension is activated
-// Your extension is activated the very first time the command is executed
-export function activate(context: vscode.ExtensionContext) {
+const CHANNEL_ID_GPS_TIMES_REI_BOT = "c5e1f23f-779e-4b78-9bab-406862f294f2";
 
-	// Use the console to output diagnostic information (console.log) and errors (console.error)
-	// This line of code will only be executed once when your extension is activated
-	console.log('Congratulations, your extension "post-traq" is now active!');
+// アクセストークンをSecretStorageから取得または保存する関数
+async function getAccessToken(
+  context: vscode.ExtensionContext
+): Promise<string | undefined> {
+  // SecretStorageからアクセストークンを取得
+  let accessToken = await context.secrets.get("traqAccessToken");
 
-	// The command has been defined in the package.json file
-	// Now provide the implementation of the command with registerCommand
-	// The commandId parameter must match the command field in package.json
-	const disposable = vscode.commands.registerCommand('post-traq.helloWorld', () => {
-		// The code you place here will be executed every time your command is executed
-		// Display a message box to the user
-		vscode.window.showInformationMessage('Hello World from post-traq!');
-	});
+  // アクセストークンがない場合は入力を求め、保存
+  if (!accessToken) {
+    accessToken = await vscode.window.showInputBox({
+      prompt: "Enter your traQ access token",
+      ignoreFocusOut: true, // ウィンドウがフォーカスを失っても入力ボックスを保持
+      password: true, // パスワードフィールドとして扱う（入力が隠される）
+    });
 
-	context.subscriptions.push(disposable);
+    if (accessToken) {
+      await context.secrets.store("traqAccessToken", accessToken);
+      vscode.window.showInformationMessage("Access token saved securely.");
+    } else {
+      vscode.window.showErrorMessage("Access token is required.");
+    }
+  }
+
+  return accessToken;
 }
 
-// This method is called when your extension is deactivated
+// 拡張機能のアクティベーション
+export function activate(context: vscode.ExtensionContext) {
+  // コマンド登録：traQにメッセージを送信
+  let disposable = vscode.commands.registerCommand(
+    "post-traq.sendMessageToTraq",
+    async () => {
+      // アクセストークンを取得
+      const accessToken = await getAccessToken(context);
+      if (!accessToken) {
+        return; // アクセストークンがない場合は処理を終了
+      }
+
+      // チャネルIDとメッセージを指定
+      const apiUrl = `https://q.trap.jp/api/v3/channels/${CHANNEL_ID_GPS_TIMES_REI_BOT}/messages`;
+
+      const message = await vscode.window.showInputBox({
+        prompt: "Enter the message to send to traQ",
+        placeHolder: "Message...",
+        ignoreFocusOut: true,
+      });
+
+      if (!message) {
+        vscode.window.showErrorMessage("Message is required.");
+        return;
+      }
+
+      // リクエストヘッダーの設定
+      const config = {
+        headers: {
+          Authorization: `Bearer ${accessToken}`, // アクセストークンをヘッダーに含める
+          "Content-Type": "application/json",
+        },
+      };
+
+      // POSTリクエストを送信
+      try {
+        const response = await axios.post(
+          apiUrl,
+          {
+            content: message,
+          },
+          config
+        );
+
+        // 成功した場合の処理
+        vscode.window.showInformationMessage("Message sent to traQ!");
+        console.log("Response:", response.data);
+      } catch (error) {
+        // エラー処理
+        vscode.window.showErrorMessage("Failed to send message to traQ.");
+        console.error("Error:", error);
+      }
+    }
+  );
+
+  context.subscriptions.push(disposable);
+}
+
+// 拡張機能の非アクティベート
 export function deactivate() {}
