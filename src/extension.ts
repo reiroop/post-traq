@@ -34,7 +34,7 @@ async function getAccessToken(
 export function activate(context: vscode.ExtensionContext) {
   // コマンド登録：traQにメッセージを送信
   let disposable = vscode.commands.registerCommand(
-    "post-traq.sendMessageToTraq",
+    "post-traq.postMessageToTraq",
     async () => {
       // アクセストークンを取得
       const accessToken = await getAccessToken(context);
@@ -46,7 +46,7 @@ export function activate(context: vscode.ExtensionContext) {
       const apiUrl = `https://q.trap.jp/api/v3/channels/${CHANNEL_ID_GPS_TIMES_REI}/messages`;
 
       const message = await vscode.window.showInputBox({
-        prompt: "Enter the message to send to traQ",
+        prompt: "Enter the message to post to traQ",
         placeHolder: "Message...",
         ignoreFocusOut: true,
       });
@@ -75,11 +75,11 @@ export function activate(context: vscode.ExtensionContext) {
         );
 
         // 成功した場合の処理
-        vscode.window.showInformationMessage("Message sent to traQ!");
+        vscode.window.showInformationMessage("Message posted to traQ!");
         console.log("Response:", response.data);
       } catch (error) {
         // エラー処理
-        vscode.window.showErrorMessage("Failed to send message to traQ.");
+        vscode.window.showErrorMessage("Failed to post message to traQ.");
         console.error("Error:", error);
       }
     }

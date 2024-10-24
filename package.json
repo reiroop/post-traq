@@ -14,8 +14,8 @@
   "contributes": {
     "commands": [
       {
-        "command": "post-traq.sendMessageToTraq",
-        "title": "Send Message To traQ"
+        "command": "post-traq.postMessageToTraq",
+        "title": "Post Message To traQ"
       }
     ]
   },

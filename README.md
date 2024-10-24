@@ -4,7 +4,7 @@ traQにメッセージを送信します。
 
 ## Features
 
-### Send Message To traQ
+### Post Message To traQ
 
 traQにメッセージを送信します。
 
