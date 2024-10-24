@@ -75,7 +75,6 @@ export function activate(context: vscode.ExtensionContext) {
         );
 
         // 成功した場合の処理
-        vscode.window.showInformationMessage("Message posted to traQ!");
         console.log("Response:", response.data);
       } catch (error) {
         // エラー処理
