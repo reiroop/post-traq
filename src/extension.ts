@@ -6,25 +6,25 @@ async function getAccessToken(
   context: vscode.ExtensionContext
 ): Promise<string | undefined> {
   // SecretStorageからアクセストークンを取得
-  let accessToken = await context.secrets.get("traqAccessToken");
+  let traqAccessToken = await context.secrets.get("traqAccessToken");
 
   // アクセストークンがない場合は入力を求め、保存
-  if (!accessToken) {
-    accessToken = await vscode.window.showInputBox({
-      prompt: "Enter your traQ access token",
+  if (!traqAccessToken) {
+    traqAccessToken = await vscode.window.showInputBox({
+      prompt: "traQのアクセストークンを入力してください",
       ignoreFocusOut: true, // ウィンドウがフォーカスを失っても入力ボックスを保持
       password: true, // パスワードフィールドとして扱う（入力が隠される）
     });
 
-    if (accessToken) {
-      await context.secrets.store("traqAccessToken", accessToken);
-      vscode.window.showInformationMessage("Access token saved securely.");
+    if (traqAccessToken) {
+      await context.secrets.store("traqAccessToken", traqAccessToken);
+      vscode.window.showInformationMessage("アクセストークンを保存しました");
     } else {
-      vscode.window.showErrorMessage("Access token is required.");
+      vscode.window.showErrorMessage("アクセストークンが入力されませんでした");
     }
   }
 
-  return accessToken;
+  return traqAccessToken;
 }
 
 // 拡張機能のアクティベーション
@@ -36,6 +36,7 @@ export function activate(context: vscode.ExtensionContext) {
       // アクセストークンを取得
       const accessToken = await getAccessToken(context);
       if (!accessToken) {
+        vscode.window.showErrorMessage("アクセストークンが登録されていません");
         return; // アクセストークンがない場合は処理を終了
       }
 
@@ -90,13 +91,13 @@ export function activate(context: vscode.ExtensionContext) {
       }
 
       const message = await vscode.window.showInputBox({
-        prompt: "Enter the message to post to traQ",
+        prompt: "traQに投稿するメッセージを入力してください",
         placeHolder: "Message...",
         ignoreFocusOut: true,
       });
 
       if (!message) {
-        vscode.window.showErrorMessage("Message is required.");
+        vscode.window.showErrorMessage("メッセージが入力されませんでした");
         return;
       }
 
