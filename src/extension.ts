@@ -40,17 +40,52 @@ export function activate(context: vscode.ExtensionContext) {
       }
 
       // 設定から `channelId` を取得
-      const channelId = vscode.workspace
+      const postChannelId = vscode.workspace
         .getConfiguration("postTraq")
-        .get<string>("channelId");
+        .get<string>("postChannelId");
 
-      if (!channelId) {
-        vscode.window.showErrorMessage("Channel ID is not configured.");
+      if (!postChannelId) {
+        vscode.window.showErrorMessage(
+          "投稿先のチャンネルIDが設定されていません"
+        );
         return;
       }
 
       // チャネルIDとメッセージを指定
-      const apiUrl = `https://q.trap.jp/api/v3/channels/${channelId}/messages`;
+      const channelApiUrlToPost = `https://q.trap.jp/api/v3/channels/${postChannelId}`;
+
+      // リクエストヘッダーの設定
+      const config = {
+        headers: {
+          Authorization: `Bearer ${accessToken}`, // アクセストークンをヘッダーに含める
+          "Content-Type": "application/json",
+        },
+      };
+
+      // POSTリクエストを送信
+      try {
+        const channelDetailResponseToPost = await axios.get(
+          channelApiUrlToPost,
+          config
+        );
+
+        // 成功した場合の処理
+        console.log(
+          "channel detail to post:",
+          channelDetailResponseToPost.data
+        );
+        if (channelDetailResponseToPost.data.force) {
+          vscode.window.showErrorMessage(
+            "強制通知チャンネルが投稿先に設定されているため、投稿できません"
+          );
+          return;
+        }
+      } catch (error) {
+        // エラー処理
+        vscode.window.showErrorMessage("チャンネル情報の取得に失敗しました");
+        console.error("Error:", error);
+        return;
+      }
 
       const message = await vscode.window.showInputBox({
         prompt: "Enter the message to post to traQ",
@@ -63,18 +98,10 @@ export function activate(context: vscode.ExtensionContext) {
         return;
       }
 
-      // リクエストヘッダーの設定
-      const config = {
-        headers: {
-          Authorization: `Bearer ${accessToken}`, // アクセストークンをヘッダーに含める
-          "Content-Type": "application/json",
-        },
-      };
-
       // POSTリクエストを送信
       try {
         const response = await axios.post(
-          apiUrl,
+          channelApiUrlToPost,
           {
             content: message,
           },
@@ -85,7 +112,9 @@ export function activate(context: vscode.ExtensionContext) {
         console.log("Response:", response.data);
       } catch (error) {
         // エラー処理
-        vscode.window.showErrorMessage("Failed to post message to traQ.");
+        vscode.window.showErrorMessage(
+          "traQへのメッセージの投稿に失敗しました"
+        );
         console.error("Error:", error);
       }
     }
