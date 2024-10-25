@@ -2,7 +2,7 @@ import axios from "axios";
 import * as vscode from "vscode";
 
 // アクセストークンをSecretStorageから取得または保存する関数
-async function getAccessToken(
+async function getTraqAccessToken(
   context: vscode.ExtensionContext
 ): Promise<string | undefined> {
   // SecretStorageからアクセストークンを取得
@@ -34,7 +34,7 @@ export function activate(context: vscode.ExtensionContext) {
     "post-traq.postMessageToTraq",
     async () => {
       // アクセストークンを取得
-      const accessToken = await getAccessToken(context);
+      const accessToken = await getTraqAccessToken(context);
       if (!accessToken) {
         vscode.window.showErrorMessage("アクセストークンが登録されていません");
         return; // アクセストークンがない場合は処理を終了
