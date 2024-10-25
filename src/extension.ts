@@ -90,39 +90,42 @@ export function activate(context: vscode.ExtensionContext) {
         return;
       }
 
-      const message = await vscode.window.showInputBox({
-        prompt: "traQに投稿するメッセージを入力してください",
-        placeHolder: "Message...",
-        ignoreFocusOut: true,
-      });
+      while (true) {
+        const message = await vscode.window.showInputBox({
+          prompt: "traQに投稿するメッセージを入力してください",
+          placeHolder: "Message...",
+          ignoreFocusOut: true,
+        });
 
-      if (message === undefined) {
-        return;
-      }
+        if (message === undefined) {
+          return;
+        }
 
-      if (!message) {
-        vscode.window.showErrorMessage("メッセージが入力されませんでした");
-        return;
-      }
+        if (!message) {
+          vscode.window.showErrorMessage("メッセージが入力されませんでした");
+          return;
+        }
 
-      // POSTリクエストを送信
-      try {
-        const response = await axios.post(
-          channelApiUrlToPost + "/messages",
-          {
-            content: message,
-          },
-          config
-        );
+        // POSTリクエストを送信
+        try {
+          const response = await axios.post(
+            channelApiUrlToPost + "/messages",
+            {
+              content: message,
+            },
+            config
+          );
 
-        // 成功した場合の処理
-        console.log("Response:", response.data);
-      } catch (error) {
-        // エラー処理
-        vscode.window.showErrorMessage(
-          "traQへのメッセージの投稿に失敗しました: " + error
-        );
-        console.error("Error:", error);
+          // 成功した場合の処理
+          console.log("Response:", response.data);
+        } catch (error) {
+          // エラー処理
+          vscode.window.showErrorMessage(
+            "traQへのメッセージの投稿に失敗しました: " + error
+          );
+          console.error("Error:", error);
+          return;
+        }
       }
     }
   );

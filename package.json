@@ -2,7 +2,7 @@
   "name": "post-traq",
   "displayName": "post-traq",
   "description": "traQに投稿します",
-  "version": "0.0.7",
+  "version": "0.0.8",
   "engines": {
     "vscode": "^1.94.0"
   },
