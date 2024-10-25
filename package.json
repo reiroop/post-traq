@@ -2,7 +2,7 @@
   "name": "post-traq",
   "displayName": "post-traq",
   "description": "traQに投稿します",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "engines": {
     "vscode": "^1.94.0"
   },
@@ -15,7 +15,7 @@
     "commands": [
       {
         "command": "post-traq.postMessageToTraq",
-        "title": "Post Message To traQ"
+        "title": "Post Message to traQ"
       },
       {
         "command": "post-traq.deleteTraqMessage",
