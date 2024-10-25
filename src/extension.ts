@@ -128,6 +128,59 @@ export function activate(context: vscode.ExtensionContext) {
   );
 
   context.subscriptions.push(disposable);
+
+  const disposable2 = vscode.commands.registerCommand(
+    "post-traq.deleteTraqMessage",
+    async () => {
+      // アクセストークンを取得
+      const accessToken = await getTraqAccessToken(context);
+      if (!accessToken) {
+        vscode.window.showErrorMessage("アクセストークンが登録されていません");
+        return; // アクセストークンがない場合は処理を終了
+      }
+
+      const messageId = await vscode.window.showInputBox({
+        prompt: "削除するメッセージのIDを入力してください",
+        placeHolder: "Message ID...",
+        ignoreFocusOut: true,
+      });
+
+      if (messageId === undefined) {
+        return;
+      }
+
+      if (!messageId) {
+        vscode.window.showErrorMessage("メッセージIDが入力されませんでした");
+        return;
+      }
+
+      // チャネルIDとメッセージを指定
+      const channelApiUrlToPost = `https://q.trap.jp/api/v3/messages/${messageId}`;
+
+      // リクエストヘッダーの設定
+      const config = {
+        headers: {
+          Authorization: `Bearer ${accessToken}`, // アクセストークンをヘッダーに含める
+          "Content-Type": "application/json",
+        },
+      };
+
+      // POSTリクエストを送信
+      try {
+        const response = await axios.delete(channelApiUrlToPost, config);
+
+        // 成功した場合の処理
+        vscode.window.showInformationMessage("メッセージを削除しました");
+        console.log("Response:", response.data);
+      } catch (error) {
+        // エラー処理
+        vscode.window.showErrorMessage(
+          "traQへのメッセージの削除に失敗しました: " + error
+        );
+        console.error("Error:", error);
+      }
+    }
+  );
 }
 
 // 拡張機能の非アクティベート
