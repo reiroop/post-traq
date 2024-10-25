@@ -1,6 +1,47 @@
 import axios from "axios";
 import * as vscode from "vscode";
 
+class TraqTreeItem extends vscode.TreeItem {
+  constructor(
+    public readonly label: string,
+    public readonly collapsibleState: vscode.TreeItemCollapsibleState,
+    public readonly command?: vscode.Command
+  ) {
+    super(label, collapsibleState);
+  }
+}
+
+class TraqTreeDataProvider implements vscode.TreeDataProvider<TraqTreeItem> {
+  private _onDidChangeTreeData: vscode.EventEmitter<
+    TraqTreeItem | undefined | void
+  > = new vscode.EventEmitter<TraqTreeItem | undefined | void>();
+  readonly onDidChangeTreeData: vscode.Event<TraqTreeItem | undefined | void> =
+    this._onDidChangeTreeData.event;
+
+  getTreeItem(element: TraqTreeItem): vscode.TreeItem {
+    return element;
+  }
+
+  getChildren(element?: TraqTreeItem): Thenable<TraqTreeItem[]> {
+    // サイドバーに表示する項目を定義
+    return Promise.resolve([
+      new TraqTreeItem(
+        "Send Message to traQ",
+        vscode.TreeItemCollapsibleState.None,
+        {
+          command: "post-traq.postMessageToTraq",
+          title: "Post Message",
+          arguments: [], // コマンドに渡す引数
+        }
+      ),
+    ]);
+  }
+
+  refresh(): void {
+    this._onDidChangeTreeData.fire();
+  }
+}
+
 // アクセストークンをSecretStorageから取得または保存する関数
 async function getTraqAccessToken(
   context: vscode.ExtensionContext
@@ -29,10 +70,18 @@ async function getTraqAccessToken(
 
 // 拡張機能のアクティベーション
 export function activate(context: vscode.ExtensionContext) {
+  const treeDataProvider = new TraqTreeDataProvider();
+  vscode.window.registerTreeDataProvider("postTraqView", treeDataProvider);
+
+  context.subscriptions.push(
+    vscode.commands.registerCommand("post-traq.refreshView", () =>
+      treeDataProvider.refresh()
+    )
+  );
+
   // コマンド登録：traQにメッセージを送信
-  let disposable = vscode.commands.registerCommand(
-    "post-traq.postMessageToTraq",
-    async () => {
+  context.subscriptions.push(
+    vscode.commands.registerCommand("post-traq.postMessageToTraq", async () => {
       // アクセストークンを取得
       const accessToken = await getTraqAccessToken(context);
       if (!accessToken) {
@@ -124,14 +173,11 @@ export function activate(context: vscode.ExtensionContext) {
         );
         console.error("Error:", error);
       }
-    }
+    })
   );
 
-  context.subscriptions.push(disposable);
-
-  const disposable2 = vscode.commands.registerCommand(
-    "post-traq.deleteTraqMessage",
-    async () => {
+  context.subscriptions.push(
+    vscode.commands.registerCommand("post-traq.deleteTraqMessage", async () => {
       // アクセストークンを取得
       const accessToken = await getTraqAccessToken(context);
       if (!accessToken) {
@@ -179,8 +225,66 @@ export function activate(context: vscode.ExtensionContext) {
         );
         console.error("Error:", error);
       }
-    }
+    })
   );
+
+  context.subscriptions.push(
+    vscode.commands.registerCommand("post-traq.openSidebar", () => {
+      const panel = vscode.window.createWebviewPanel(
+        "postTraqSidebar", // Webviewの識別子
+        "Post to traQ", // タイトル
+        vscode.ViewColumn.One, // どのカラムに表示するか
+        {
+          enableScripts: true, // WebviewでJavaScriptを有効化
+        }
+      );
+
+      // HTMLをWebviewにセット
+      panel.webview.html = getWebviewContent();
+
+      // Webviewからのメッセージを処理
+      panel.webview.onDidReceiveMessage(
+        (message) => {
+          switch (message.command) {
+            case "postMessage":
+              vscode.window.showInformationMessage(`Message: ${message.text}`);
+              return;
+          }
+        },
+        undefined,
+        context.subscriptions
+      );
+    })
+  );
+}
+
+function getWebviewContent() {
+  return `
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>Post to traQ</title>
+    </head>
+    <body>
+      <h1>Post a message to traQ</h1>
+      <input id="messageInput" type="text" placeholder="Enter your message" />
+      <button onclick="postMessage()">Send</button>
+
+      <script>
+        const vscode = acquireVsCodeApi();
+        function postMessage() {
+          const message = document.getElementById('messageInput').value;
+          vscode.postMessage({
+            command: 'postMessage',
+            text: message
+          });
+        }
+      </script>
+    </body>
+    </html>
+  `;
 }
 
 // 拡張機能の非アクティベート

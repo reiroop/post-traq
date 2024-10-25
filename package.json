@@ -20,6 +20,14 @@
       {
         "command": "post-traq.deleteTraqMessage",
         "title": "Delete traQ Message"
+      },
+      {
+        "command": "post-traq.openSidebar",
+        "title": "Open post-traq Sidebar"
+      },
+      {
+        "command": "post-traq.refreshView",
+        "title": "Refresh View"
       }
     ],
     "configuration": {
@@ -32,6 +40,23 @@
           "description": "The traQ channel ID to post messages."
         }
       }
+    },
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "postTraqSidebar",
+          "title": "post-traq",
+          "icon": "resources/icon.png"
+        }
+      ]
+    },
+    "views": {
+      "postTraqSidebar": [
+        {
+          "id": "postTraqView",
+          "name": "Post to traQ"
+        }
+      ]
     }
   },
   "scripts": {
