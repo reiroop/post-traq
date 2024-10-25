@@ -30,9 +30,8 @@ async function getTraqAccessToken(
 // 拡張機能のアクティベーション
 export function activate(context: vscode.ExtensionContext) {
   // コマンド登録：traQにメッセージを送信
-  let disposable = vscode.commands.registerCommand(
-    "post-traq.postMessageToTraq",
-    async () => {
+  context.subscriptions.push(
+    vscode.commands.registerCommand("post-traq.postMessageToTraq", async () => {
       // アクセストークンを取得
       const accessToken = await getTraqAccessToken(context);
       if (!accessToken) {
@@ -127,14 +126,11 @@ export function activate(context: vscode.ExtensionContext) {
           return;
         }
       }
-    }
+    })
   );
 
-  context.subscriptions.push(disposable);
-
-  const disposable2 = vscode.commands.registerCommand(
-    "post-traq.deleteTraqMessage",
-    async () => {
+  context.subscriptions.push(
+    vscode.commands.registerCommand("post-traq.deleteTraqMessage", async () => {
       // アクセストークンを取得
       const accessToken = await getTraqAccessToken(context);
       if (!accessToken) {
@@ -182,7 +178,7 @@ export function activate(context: vscode.ExtensionContext) {
         );
         console.error("Error:", error);
       }
-    }
+    })
   );
 }
 
