@@ -96,6 +96,10 @@ export function activate(context: vscode.ExtensionContext) {
         ignoreFocusOut: true,
       });
 
+      if (message === undefined) {
+        return;
+      }
+
       if (!message) {
         vscode.window.showErrorMessage("メッセージが入力されませんでした");
         return;
